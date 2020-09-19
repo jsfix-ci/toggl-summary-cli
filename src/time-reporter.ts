@@ -78,7 +78,7 @@ export function wasPreviousEntryBreakStart(currentIndex: number, array: Simplifi
  * @param currentIndex the index in the array for the current entry
  * @param array the array containing the entries
  */
-function getTimeBetweenEntries(currentIndex: number, array: SimplifiedDetailedReportItem[]): Duration {
+export function getTimeBetweenEntries(currentIndex: number, array: SimplifiedDetailedReportItem[]): Duration {
 
     /* Work out the time between this entry and the previous one */
     let timeBetweenEntries: Duration;

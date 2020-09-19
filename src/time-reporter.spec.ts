@@ -1,5 +1,5 @@
 import { SimplifiedDetailedReportItem } from './structures';
-import { doesEntryHaveBreakStartMarker, wasPreviousEntryBreakStart } from './time-reporter';
+import { doesEntryHaveBreakStartMarker, getTimeBetweenEntries, wasPreviousEntryBreakStart } from './time-reporter';
 
 function createEmptyEntry(): SimplifiedDetailedReportItem {
     return {
@@ -99,5 +99,37 @@ describe('time-reporter calculator tests', () => {
 
         const previousIsMarker = wasPreviousEntryBreakStart(1, entries);
         expect(previousIsMarker).toBeFalsy();
+    });
+
+    it('should calculate the duration between entries', () => {
+
+        const entries = [
+            createEmptyEntry(),
+            createEmptyEntry()
+        ];
+
+        entries[0].start = '2020-09-03T10:10:00+01:00';
+        entries[0].end = '2020-09-03T10:10:00+01:00';
+        entries[1].start = '2020-09-03T10:20:00+01:00';
+        entries[1].end = '2020-09-03T10:20:00+01:00';
+
+        const duration = getTimeBetweenEntries(1, entries);
+
+        expect(duration.toMinutes()).toEqual(10);
+
+    });
+
+    it('should calculate the duration between entries to be zero when there is only one', () => {
+
+        const entries = [
+            createEmptyEntry()
+        ];
+
+        entries[0].start = '2020-09-03T10:10:00+01:00';
+        entries[0].end = '2020-09-03T10:10:00+01:00';
+
+        const duration = getTimeBetweenEntries(0, entries);
+
+        expect(duration.toMinutes()).toEqual(0);
     });
 });
