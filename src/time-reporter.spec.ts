@@ -2,7 +2,8 @@ import { Duration } from 'js-joda';
 
 import { SimplifiedDetailedReportItem } from './structures';
 import { calculateTimeTotals, doesEntryHaveBreakStartMarker, 
-         getTimeBetweenEntries, wasPreviousEntryBreakStart } from './time-reporter';
+         formatMillis, getTimeBetweenEntries, 
+         wasPreviousEntryBreakStart } from './time-reporter';
 
 function createEmptyEntry(): SimplifiedDetailedReportItem {
     return {
@@ -136,7 +137,20 @@ describe('time-reporter calculator tests', () => {
         expect(duration.toMinutes()).toEqual(0);
     });
 
-    it('should calculate totals', () => {
+    it('should format milliseconds into HH:mm:ss format', () => {
+
+        const shortDuration = Duration.ofMinutes(9).plusSeconds(2);
+        const formattedShort = formatMillis(shortDuration.toMillis());
+        expect(formattedShort).toEqual('00:09:02');
+
+        const longDuration = Duration.ofHours(10).plusMinutes(30).plusSeconds(59);
+        const formattedLong = formatMillis(longDuration.toMillis());
+        expect(formattedLong).toEqual('10:30:59');
+
+
+    });
+
+    it('should calculate totals in the same day', () => {
 
         const entries = [
             createEmptyEntry(),
@@ -167,6 +181,36 @@ describe('time-reporter calculator tests', () => {
         expect(totals.bookedTime).toEqual(Duration.ofMinutes(80).toMillis());
         expect(totals.breakTime).toEqual(Duration.ofMinutes(70).toMillis());
         expect(totals.unbookedTime).toEqual(Duration.ofMinutes(10).toMillis());
+        expect(totals.timeCount).toEqual(Duration.ofMinutes(90).toMillis());
+
+    });
+
+    it('should calculate totals accross days', () => {
+
+        const entries = [
+            createEmptyEntry(),
+            createEmptyEntry(),
+            createEmptyEntry()
+        ];
+
+        entries[0].start = '2020-09-03T10:10:00+01:00';
+        entries[0].end = '2020-09-03T10:20:00+01:00';
+        entries[0].dur = Duration.ofMinutes(10).toMillis();
+
+        entries[1].start = '2020-09-03T10:50:00+01:00';
+        entries[1].end = '2020-09-03T10:50:00+01:00';
+        entries[1].dur = Duration.ZERO.toMillis();
+        entries[1].tags = ['marker']
+
+        entries[2].start = '2020-09-04T12:00:00+01:00';
+        entries[2].end = '2020-09-04T12:50:00+01:00';
+        entries[2].dur = Duration.ofMinutes(50).toMillis();
+
+        const totals = calculateTimeTotals(entries);
+
+        expect(totals.bookedTime).toEqual(Duration.ofMinutes(60).toMillis());
+        expect(totals.breakTime).toEqual(Duration.ZERO.toMillis());
+        expect(totals.unbookedTime).toEqual(Duration.ofMinutes(30).toMillis());
         expect(totals.timeCount).toEqual(Duration.ofMinutes(90).toMillis());
 
     });

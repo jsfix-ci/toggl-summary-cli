@@ -34,6 +34,21 @@ export function doesEntryHaveBreakStartMarker(entry: SimplifiedDetailedReportIte
 }
 
 /**
+ * Function to determine if two entries are for the same day. 
+ * @param a the first entry to compare the end date for
+ * @param b the second entry to compare the start date for
+ */
+function areEntriesForTheSameDay(a: SimplifiedDetailedReportItem, 
+    b: SimplifiedDetailedReportItem): boolean {
+
+    /* Check the entries are for the same day */
+    const currentDate = LocalDate.parse(a.end.substr(0, 10));
+    const prevDate = LocalDate.parse(b.start.substr(0, 10));
+
+    return currentDate.equals(prevDate);
+}
+
+/**
  * Helper function to work out if the previous entry was the start of a break.
  * @param currentIndex the index in the array for the current entry
  * @param array the array containing the entries
@@ -59,10 +74,7 @@ export function wasPreviousEntryBreakStart(currentIndex: number, array: Simplifi
 
         if (isMarker) {
             /* Check the entries are for the same day */
-            const currentDate = LocalDate.parse(array[currentIndex].end.substr(0,10));
-            const prevDate = LocalDate.parse(array[currentIndex - 1].start.substr(0,10));
-
-            isMarker = currentDate.equals(prevDate);
+            isMarker = areEntriesForTheSameDay(array[currentIndex - 1], array[currentIndex]);
         }
     } else {
         /* No previous entries */
@@ -102,6 +114,24 @@ export function getTimeBetweenEntries(currentIndex: number, array: SimplifiedDet
 }
 
 /**
+ * Format the supplied number of milliseconds as an HH:mm:ss string. 
+ * @param millseconds the number of milliseconds to format
+ */
+export function formatMillis(millseconds: number): string {
+
+    const seconds = Math.floor((millseconds / 1000) % 60);
+    const minutes = Math.floor((millseconds / (1000 * 60)) % 60);
+    /* Intentionally not "% 24" this as we want to be able to have more than 24 hours,
+       not using a seperate day counter */
+    const hours = Math.floor((millseconds / (1000 * 60 * 60)));
+
+    return [
+        String(hours).padStart(2, '0'),
+        String(minutes).padStart(2, '0'),
+        String(seconds).padStart(2, '0')].join(':');
+}
+
+/**
  * Calculate summary time information for the report data. 
  * 
  * Includes:
@@ -127,7 +157,6 @@ export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[]):
         .sort((a, b) => ZonedDateTime.parse(a.start).compareTo(ZonedDateTime.parse(b.start)));
 
 
-    let lastSawMarker = false;
     reportData
         .forEach((entry, index, array) => {
 
@@ -153,14 +182,15 @@ export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[]):
              * and add it to the correct total based on our state */
             let timeBetweenEntries = getTimeBetweenEntries(index, array);
 
-            if (lastSawMarker) {
+            if (wasPreviousEntryBreakStart(index, array)) {
                 /* The previous entry was a 'break start' marker. 
                  * Gap time is break time */
                 timeSummary.breakTime += timeBetweenEntries.toMillis();
                 console.log(chalk.greenBright(
                     'Break time: ' + timeBetweenEntries.toString()));
-            } else {
-                /* Gap time is unbooked time */
+            } else if (index === 0 || areEntriesForTheSameDay(array[index - 1], array[index])) {
+                /* Gap time is unbooked time if the end of the last item is the same
+                 * day as the current item */
                 timeSummary.unbookedTime += timeBetweenEntries.toMillis();
 
                 /* Only log it to the console if it is more than 5 minutes */
@@ -169,8 +199,6 @@ export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[]):
                         'Unbooked time since last entry: ' + timeBetweenEntries.toString()));
                 }
             }
-
-            lastSawMarker = entryHasMarker;
         });
 
     /* Total time is the combination of booked and unbooked time */
