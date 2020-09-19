@@ -17,7 +17,40 @@ export interface SuccessReportResponse<T> {
 
 }
 
-export interface DetailedReportItem {
+/**
+ * Interface containing the cut down fields of a regular DetailedReportItem
+ * that we are actually interested in for this program. 
+ */
+export interface SimplifiedDetailedReportItem {
+    /**
+     * time entry description
+     */
+    description: string;
+    /**
+     * start time of the time entry in ISO 8601 date and time format (YYYY-MM-DDTHH:MM:SS)
+     */
+    start: string;
+    /**
+     * end time of the time entry in ISO 8601 date and time format (YYYY-MM-DDTHH:MM:SS)
+     */
+    end: string;
+    /**
+     * time entry duration in milliseconds
+     */
+    dur: number;
+    /**
+     * array of tag names, which assigned for the time entry
+     */
+    tags: string[];
+}
+
+/**
+ * Interface for the fields returned for a detailed report item. 
+ * 
+ * This is split with some of the fields in SimplifiedDetailedReportItem,
+ * as we don't care about the whole object (and this simplifies testing).
+ */
+export interface DetailedReportItem extends SimplifiedDetailedReportItem {
     /**
      * time entry id
      */
@@ -51,22 +84,6 @@ export interface DetailedReportItem {
      */
     user: string;
     /**
-     * time entry description
-     */
-    description: string;
-    /**
-     * start time of the time entry in ISO 8601 date and time format (YYYY-MM-DDTHH:MM:SS)
-     */
-    start: string;
-    /**
-     * end time of the time entry in ISO 8601 date and time format (YYYY-MM-DDTHH:MM:SS)
-     */
-    end: string;
-    /**
-     * time entry duration in milliseconds
-     */
-    dur: number;
-    /**
      * last time the time entry was updated in ISO 8601 date and time format (YYYY-MM-DDTHH:MM:SS)
      */
     updated: Date;
@@ -74,10 +91,6 @@ export interface DetailedReportItem {
      * if the stop time is saved on the time entry, depends on user's personal settings.
      */
     use_stop: boolean;
-    /**
-     * array of tag names, which assigned for the time entry
-     */
-    tags: string[];
 }
 
 export interface DetailedReportResponse extends SuccessReportResponse<DetailedReportItem> {

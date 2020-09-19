@@ -1,6 +1,6 @@
 import chalk from 'chalk'
-import { Duration, ZonedDateTime}  from 'js-joda';
-import { DetailedReportItem } from "./structures";
+import { Duration, ZonedDateTime, LocalDate } from 'js-joda';
+import { SimplifiedDetailedReportItem } from "./structures";
 
 /**
  * Interface holding the calculated times
@@ -24,9 +24,13 @@ export interface TimeSummary {
     unbookedTime: number;
 }
 
-function doesEntryHaveBreakStartMarker(entry: DetailedReportItem) : boolean {
-    //TODO: 
-    return false
+/**
+ * Function to determine if an entry contains the tag for being a marker. 
+ * @param entry the entry to check
+ * @returns true if it does, false if it doesn't
+ */
+export function doesEntryHaveBreakStartMarker(entry: SimplifiedDetailedReportItem): boolean {
+    return entry.tags && entry.tags.includes('marker');
 }
 
 /**
@@ -34,9 +38,38 @@ function doesEntryHaveBreakStartMarker(entry: DetailedReportItem) : boolean {
  * @param currentIndex the index in the array for the current entry
  * @param array the array containing the entries
  */
-function wasPreviousEntryBreakStart(currentIndex: number, array: DetailedReportItem[]): boolean {
-    //TODO: 
-    return false;
+export function wasPreviousEntryBreakStart(currentIndex: number, array: SimplifiedDetailedReportItem[]): boolean {
+
+    /* A previous entry counts as a break start if:
+     * - it has a marker tag (doesEntryHaveBreakStartMarker)
+     * - the entry before it does is not a break start
+     * - it is for the same day as the current entry
+    */
+
+    let isMarker: boolean;
+    if (currentIndex > 0) {
+
+        const prevEntry = array[currentIndex - 1];
+        isMarker = doesEntryHaveBreakStartMarker(prevEntry);
+
+        if (isMarker) {
+            /* Check the previous entry to check it wasn't one too */
+            isMarker = !wasPreviousEntryBreakStart(currentIndex - 1, array);
+        }
+
+        if (isMarker) {
+            /* Check the entries are for the same day */
+            const currentDate = LocalDate.parse(array[currentIndex].end.substr(0,10));
+            const prevDate = LocalDate.parse(array[currentIndex - 1].start.substr(0,10));
+
+            isMarker = currentDate.equals(prevDate);
+        }
+    } else {
+        /* No previous entries */
+        isMarker = false;
+    }
+
+    return isMarker;
 }
 
 /**
@@ -45,13 +78,13 @@ function wasPreviousEntryBreakStart(currentIndex: number, array: DetailedReportI
  * @param currentIndex the index in the array for the current entry
  * @param array the array containing the entries
  */
-function getTimeBetweenEntries(currentIndex: number, array: DetailedReportItem[]): Duration {
+function getTimeBetweenEntries(currentIndex: number, array: SimplifiedDetailedReportItem[]): Duration {
 
     /* Work out the time between this entry and the previous one */
     let timeBetweenEntries: Duration;
     if (currentIndex > 0) {
         /* There is a previous entry */
-        const prevEntry = array[currentIndex-1];
+        const prevEntry = array[currentIndex - 1];
         const currentEntry = array[currentIndex];
 
         timeBetweenEntries = Duration.between(
@@ -79,7 +112,7 @@ function getTimeBetweenEntries(currentIndex: number, array: DetailedReportItem[]
  * 
  * @param reportData The detailed time entry items for the reporting period
  */
-export function calculateTimeTotals(reportData: DetailedReportItem[]): TimeSummary {
+export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[]): TimeSummary {
 
     /* Setup the initial return object with initial values */
     const timeSummary: TimeSummary = {
@@ -98,15 +131,17 @@ export function calculateTimeTotals(reportData: DetailedReportItem[]): TimeSumma
     reportData
         .forEach((entry, index, array) => {
 
-            console.log('Time entry for %s: %s', 
+            console.log('Time entry for %s: %s',
                 entry.description, Duration.ofMillis(entry.dur));
+            // console.log(entry);
 
             /* An entry is a "break start" marker if all the following are true:
              * - it has the tag "marker"
              * - the previous entry did not also have the tag "marker"
              */
             // TODO: RESET IF DAY CHANGE!
-            const entryHasMarker = !lastSawMarker && entry.tags && entry.tags.includes('marker');
+            const entryHasMarker = !wasPreviousEntryBreakStart(index, array) && 
+                doesEntryHaveBreakStartMarker(entry);
 
             /* Add the booked time for the entry to the running total, 
              * if it isn't a 'break' entry */
