@@ -1,5 +1,8 @@
+import { Duration } from 'js-joda';
+
 import { SimplifiedDetailedReportItem } from './structures';
-import { doesEntryHaveBreakStartMarker, getTimeBetweenEntries, wasPreviousEntryBreakStart } from './time-reporter';
+import { calculateTimeTotals, doesEntryHaveBreakStartMarker, 
+         getTimeBetweenEntries, wasPreviousEntryBreakStart } from './time-reporter';
 
 function createEmptyEntry(): SimplifiedDetailedReportItem {
     return {
@@ -131,5 +134,40 @@ describe('time-reporter calculator tests', () => {
         const duration = getTimeBetweenEntries(0, entries);
 
         expect(duration.toMinutes()).toEqual(0);
+    });
+
+    it('should calculate totals', () => {
+
+        const entries = [
+            createEmptyEntry(),
+            createEmptyEntry(),
+            createEmptyEntry(),
+            createEmptyEntry()
+        ];
+
+        entries[0].start = '2020-09-03T10:10:00+01:00';
+        entries[0].end = '2020-09-03T10:20:00+01:00';
+        entries[0].dur = Duration.ofMinutes(10).toMillis();
+
+        entries[1].start = '2020-09-03T10:30:00+01:00';
+        entries[1].end = '2020-09-03T10:50:00+01:00';
+        entries[1].dur = Duration.ofMinutes(20).toMillis();
+
+        entries[2].start = '2020-09-03T10:50:00+01:00';
+        entries[2].end = '2020-09-03T10:50:00+01:00';
+        entries[2].dur = Duration.ZERO.toMillis();
+        entries[2].tags = ['marker']
+
+        entries[3].start = '2020-09-03T12:00:00+01:00';
+        entries[3].end = '2020-09-03T12:50:00+01:00';
+        entries[3].dur = Duration.ofMinutes(50).toMillis();
+
+        const totals = calculateTimeTotals(entries);
+
+        expect(totals.bookedTime).toEqual(Duration.ofMinutes(80).toMillis());
+        expect(totals.breakTime).toEqual(Duration.ofMinutes(70).toMillis());
+        expect(totals.unbookedTime).toEqual(Duration.ofMinutes(10).toMillis());
+        expect(totals.timeCount).toEqual(Duration.ofMinutes(90).toMillis());
+
     });
 });
