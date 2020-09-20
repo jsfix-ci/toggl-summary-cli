@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { Duration, ZonedDateTime, LocalDate } from 'js-joda';
+import { Duration, ZonedDateTime, LocalDate } from '@js-joda/core';
 import { SimplifiedDetailedReportItem } from "./structures";
 
 /**

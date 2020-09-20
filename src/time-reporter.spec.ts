@@ -1,4 +1,4 @@
-import { Duration } from 'js-joda';
+import { Duration } from '@js-joda/core';
 
 import { SimplifiedDetailedReportItem } from './structures';
 import { calculateTimeTotals, doesEntryHaveBreakStartMarker, 

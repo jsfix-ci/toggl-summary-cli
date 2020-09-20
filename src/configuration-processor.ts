@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 import { Command } from 'commander';
-import { LocalDate } from 'js-joda';
+import { LocalDate } from '@js-joda/core';
 
 /**
  * Processes the CLI arguments (if any) and the ".env" file 

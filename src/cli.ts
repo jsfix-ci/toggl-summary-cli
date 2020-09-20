@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import chalk from 'chalk'
 import * as ora from 'ora'
-import { Duration } from 'js-joda'
+import { Duration } from '@js-joda/core'
 
 
 import { processConfiguration } from './configuration-processor';
