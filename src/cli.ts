@@ -17,9 +17,9 @@ axios.get<DetailedReportResponse>('https://toggl.com/reports/api/v2/details', co
   .then(response => {
 
     /* Print out the total time as reported from the API */
-    const totalTime = Duration.ofMillis(response.data.total_grand);
     console.log(
-        chalk.green('Report loaded, total booked time:', totalTime.toString()));
+        chalk.green('Report loaded, total booked time:', 
+          formatMillis(response.data.total_grand)));
 
     /* Iterate through the items to work out the time summary */
     const timeSummary = calculateTimeTotals(response.data.data, config.debug);

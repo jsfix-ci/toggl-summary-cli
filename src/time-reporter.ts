@@ -192,7 +192,7 @@ export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[], 
                  * Gap time is break time */
                 timeSummary.breakTime += timeBetweenEntries.toMillis();
                 console.log(chalk.greenBright(
-                    'Break time! ' + timeBetweenEntries.toString()));
+                    'Break time!', formatMillis(timeBetweenEntries.toMillis())));
             } else if (index === 0 || areEntriesForTheSameDay(array[index - 1], array[index])) {
                 /* Gap time is unbooked time if the end of the last item is the same
                  * day as the current item */
@@ -201,7 +201,8 @@ export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[], 
                 /* Only log it to the console if it is more than 5 minutes */
                 if (timeBetweenEntries.toMinutes() > 5) {
                     console.log(chalk.yellow(
-                        'Unbooked time since last entry: ' + timeBetweenEntries.toString()));
+                        'Unbooked time since last entry:', 
+                            formatMillis(timeBetweenEntries.toMillis())));
                 }
             }
         });
