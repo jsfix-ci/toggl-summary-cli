@@ -8,7 +8,7 @@ This tool will, for a day or a week, report on:
 - total time, the sum of booked and unbooked time
 - break time, the sum of any times between a "marker" entry and the next task
 
-In order to pick up on unbooked time and differenciate it from break time, I add entries with a tag of "marker". This is used to indicate the start of a break. The break is determined to end when the next entry starts. 
+In order to pick up on unbooked time and differentiate it from break time, I add entries with a tag of "marker". This is used to indicate the start of a break. The break is determined to end when the next entry starts. 
 
 ## Configuration
 
