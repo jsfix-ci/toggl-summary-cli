@@ -117,7 +117,7 @@ describe('time-reporter calculator tests', () => {
         entries[1].start = '2020-09-03T10:20:00+01:00';
         entries[1].end = '2020-09-03T10:20:00+01:00';
 
-        const duration = getTimeBetweenEntries(1, entries);
+        const duration = getTimeBetweenEntries(1, entries, true);
 
         expect(duration.toMinutes()).toEqual(10);
 
@@ -132,7 +132,7 @@ describe('time-reporter calculator tests', () => {
         entries[0].start = '2020-09-03T10:10:00+01:00';
         entries[0].end = '2020-09-03T10:10:00+01:00';
 
-        const duration = getTimeBetweenEntries(0, entries);
+        const duration = getTimeBetweenEntries(0, entries, false);
 
         expect(duration.toMinutes()).toEqual(0);
     });
@@ -176,7 +176,7 @@ describe('time-reporter calculator tests', () => {
         entries[3].end = '2020-09-03T12:50:00+01:00';
         entries[3].dur = Duration.ofMinutes(50).toMillis();
 
-        const totals = calculateTimeTotals(entries);
+        const totals = calculateTimeTotals(entries, true);
 
         expect(totals.bookedTime).toEqual(Duration.ofMinutes(80).toMillis());
         expect(totals.breakTime).toEqual(Duration.ofMinutes(70).toMillis());
@@ -206,7 +206,7 @@ describe('time-reporter calculator tests', () => {
         entries[2].end = '2020-09-04T12:50:00+01:00';
         entries[2].dur = Duration.ofMinutes(50).toMillis();
 
-        const totals = calculateTimeTotals(entries);
+        const totals = calculateTimeTotals(entries, false);
 
         expect(totals.bookedTime).toEqual(Duration.ofMinutes(60).toMillis());
         expect(totals.breakTime).toEqual(Duration.ZERO.toMillis());

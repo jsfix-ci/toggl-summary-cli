@@ -3,12 +3,27 @@ import { Command } from 'commander';
 import { LocalDate } from '@js-joda/core';
 
 /**
+ * Interface defining the configuration determined
+ * from the CLI and environment options. 
+ */
+export interface Configuration {
+    /**
+     * boolean for if debug logging should be used (true) or not (false)
+     */
+    debug: boolean,
+    /**
+     * The API configuration for the Toggl API
+     */
+    apiConfig: AxiosRequestConfig
+}
+
+/**
  * Processes the CLI arguments (if any) and the ".env" file 
  * (if it exists) to return the configuration for sending to
  * the Toggl API. 
  * 
  */
-export function processConfiguration(): AxiosRequestConfig {
+export function processConfiguration(): Configuration {
 
     /* Load environment file with configuration */
     require('dotenv').config();
@@ -61,7 +76,12 @@ export function processConfiguration(): AxiosRequestConfig {
         }
       };
 
-    console.log(apiConfig);
+    if (program.debug) {
+        console.log(apiConfig);
+    }
 
-    return apiConfig;
+    return {
+        debug: program.debug,
+        apiConfig: apiConfig
+    };
 }

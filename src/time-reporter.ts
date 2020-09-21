@@ -89,8 +89,10 @@ export function wasPreviousEntryBreakStart(currentIndex: number, array: Simplifi
  * entry and the end of the previous one. 
  * @param currentIndex the index in the array for the current entry
  * @param array the array containing the entries
+ * @param debug boolean for if debug logging should be used (true) or not (false)
  */
-export function getTimeBetweenEntries(currentIndex: number, array: SimplifiedDetailedReportItem[]): Duration {
+export function getTimeBetweenEntries(currentIndex: number, 
+    array: SimplifiedDetailedReportItem[], debug: boolean): Duration {
 
     /* Work out the time between this entry and the previous one */
     let timeBetweenEntries: Duration;
@@ -108,7 +110,9 @@ export function getTimeBetweenEntries(currentIndex: number, array: SimplifiedDet
         timeBetweenEntries = Duration.ZERO;
     }
 
-    console.log('Time between entries: ' + timeBetweenEntries.toString());
+    if (debug) {
+        console.log('Time between entries: ' + timeBetweenEntries.toString());
+    }
 
     return timeBetweenEntries;
 }
@@ -141,8 +145,9 @@ export function formatMillis(millseconds: number): string {
  * - unbooked time (any time between items that isn't covered as breaks)
  * 
  * @param reportData The detailed time entry items for the reporting period
+ * @param debug boolean for if debug logging should be used (true) or not (false)
  */
-export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[]): TimeSummary {
+export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[], debug: boolean): TimeSummary {
 
     /* Setup the initial return object with initial values */
     const timeSummary: TimeSummary = {
@@ -160,15 +165,15 @@ export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[]):
     reportData
         .forEach((entry, index, array) => {
 
-            console.log('Time entry for %s: %s',
-                entry.description, Duration.ofMillis(entry.dur));
-            // console.log(entry);
+            if (debug) {
+                console.log('Time entry for %s: %s',
+                    entry.description, Duration.ofMillis(entry.dur));
+            }
 
             /* An entry is a "break start" marker if all the following are true:
              * - it has the tag "marker"
              * - the previous entry did not also have the tag "marker"
              */
-            // TODO: RESET IF DAY CHANGE!
             const entryHasMarker = !wasPreviousEntryBreakStart(index, array) && 
                 doesEntryHaveBreakStartMarker(entry);
 
@@ -180,14 +185,14 @@ export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[]):
 
             /* Work out the time between this entry and the previous one
              * and add it to the correct total based on our state */
-            let timeBetweenEntries = getTimeBetweenEntries(index, array);
+            let timeBetweenEntries = getTimeBetweenEntries(index, array, debug);
 
             if (wasPreviousEntryBreakStart(index, array)) {
                 /* The previous entry was a 'break start' marker. 
                  * Gap time is break time */
                 timeSummary.breakTime += timeBetweenEntries.toMillis();
                 console.log(chalk.greenBright(
-                    'Break time: ' + timeBetweenEntries.toString()));
+                    'Break time! ' + timeBetweenEntries.toString()));
             } else if (index === 0 || areEntriesForTheSameDay(array[index - 1], array[index])) {
                 /* Gap time is unbooked time if the end of the last item is the same
                  * day as the current item */
