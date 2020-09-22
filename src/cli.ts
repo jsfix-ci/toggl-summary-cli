@@ -1,28 +1,55 @@
 #!/usr/bin/env node
-import axios, { AxiosRequestConfig } from 'axios'
+import axios from 'axios'
 import chalk from 'chalk'
-import * as ora from 'ora'
-import { Duration } from '@js-joda/core'
 
 
 import { Configuration, processConfiguration } from './configuration-processor';
-import { DetailedReportResponse } from './structures';
+import { DetailedReportItem, DetailedReportResponse } from './structures';
 import { calculateTimeTotals, formatMillis } from './time-reporter'
+
+const apiUrl = 'https://toggl.com/reports/api/v2/details';
+
+/* Define a function for loading our report data from the API. This handles pagination */
+const getDetailedReportData = async (page: number): Promise<DetailedReportItem[]> => {  
+  config.apiConfig.params.page = page;
+  
+  const response = await axios.get<DetailedReportResponse>(apiUrl, config.apiConfig)  
+  const data = response.data.data;
+
+  /* Print out the total time as reported from the API */
+  console.log(
+    chalk.green('Report page loaded', 
+      config.apiConfig.params.page,
+      'total booked time:',
+      formatMillis(response.data.total_grand)));
+
+  if (config.debug) {
+    // console.log('API Response Payload: %o', response.data);
+
+    console.log('Pagination details: total_count: %s, per_page: %s',
+      response.data.total_count, response.data.per_page)
+  }
+
+  /**
+   * If there are more pages, call the API again, otherwise return the data
+   */
+  if (response.data.data.length > 0 && response.data.data.length === response.data.per_page) {
+    return data.concat(await getDetailedReportData(page+1)) 
+  } else {
+    return data
+  }
+}
 
 /* Configure API request from command line options */
 const config: Configuration = processConfiguration();
 
 /* Call the API */
-axios.get<DetailedReportResponse>('https://toggl.com/reports/api/v2/details', config.apiConfig)
-  .then(response => {
-
-    /* Print out the total time as reported from the API */
-    console.log(
-        chalk.green('Report loaded, total booked time:', 
-          formatMillis(response.data.total_grand)));
+getDetailedReportData(1)
+// axios.get<DetailedReportResponse>('https://toggl.com/reports/api/v2/details', config.apiConfig)
+  .then(detailedItems => {
 
     /* Iterate through the items to work out the time summary */
-    const timeSummary = calculateTimeTotals(response.data.data, config.debug);
+    const timeSummary = calculateTimeTotals(detailedItems, config.debug);
 
     /* Print out the output */
     console.log(chalk.magenta('==== Totals for', config.apiConfig.params.since, 'to', config.apiConfig.params.until, '===='));
