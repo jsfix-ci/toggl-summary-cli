@@ -57,7 +57,7 @@ export function processConfiguration(): Configuration {
     }
 
     const since = LocalDate.parse(program.day);
-    const until = (program.week ? since.plusDays(7) : since);
+    const until = (program.week ? since.plusDays(6) : since);
 
     const apiConfig: AxiosRequestConfig = {
         auth: {
@@ -69,6 +69,7 @@ export function processConfiguration(): Configuration {
           'Accept-Language': 'en-gb',
         },
         params: {
+            page: 1,
             user_agent: program.email,
             workspace_id: program.workspaceId,
             since: since.toString(),

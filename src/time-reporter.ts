@@ -166,8 +166,15 @@ export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[], 
         .forEach((entry, index, array) => {
 
             if (debug) {
-                console.log('Time entry for %s: %s',
-                    entry.description, Duration.ofMillis(entry.dur));
+                console.log(chalk.gray('======================'))
+                console.log('Counts so far: total %s, breaks %s, booked %s, unbooked: %s',
+                    formatMillis(timeSummary.timeCount), 
+                    formatMillis(timeSummary.breakTime),
+                    formatMillis(timeSummary.bookedTime),
+                    formatMillis(timeSummary.unbookedTime));
+                console.log('Time entry for %s: %s (%s - %s)',
+                    entry.description, formatMillis(entry.dur),
+                    entry.start, entry.end);
             }
 
             /* An entry is a "break start" marker if all the following are true:
@@ -191,15 +198,17 @@ export function calculateTimeTotals(reportData: SimplifiedDetailedReportItem[], 
                 /* The previous entry was a 'break start' marker. 
                  * Gap time is break time */
                 timeSummary.breakTime += timeBetweenEntries.toMillis();
-                console.log(chalk.greenBright(
-                    'Break time!', formatMillis(timeBetweenEntries.toMillis())));
+                if (debug) {
+                    console.log(chalk.greenBright(
+                        'Break time!', formatMillis(timeBetweenEntries.toMillis())));
+                }
             } else if (index === 0 || areEntriesForTheSameDay(array[index - 1], array[index])) {
                 /* Gap time is unbooked time if the end of the last item is the same
                  * day as the current item */
                 timeSummary.unbookedTime += timeBetweenEntries.toMillis();
 
                 /* Only log it to the console if it is more than 5 minutes */
-                if (timeBetweenEntries.toMinutes() > 5) {
+                if (debug && timeBetweenEntries.toMinutes() > 5) {
                     console.log(chalk.yellow(
                         'Unbooked time since last entry:', 
                             formatMillis(timeBetweenEntries.toMillis())));
