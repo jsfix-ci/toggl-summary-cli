@@ -131,6 +131,20 @@ Counted break time: 00:00:00
 Counted total time: 03:43:31
 ```
 
+### Advanced Usage - To create a Day One Entry
+
+I use [Day One](https://dayoneapp.com) as my journaling application of choice. This utility script was primarily created to produce the starter for a template for daily or weekly entries relating to work. 
+
+To create a daily entry, for the current day, I run:
+```
+$ dayone2 --tags work -- new $'End of Day Work Summary\n\n' "$(DOT_ENV_CONFIG=~/.toggl-summary-cli.env npx @devwithimagination/toggl-summary-cli | tail -n +2)"
+```
+
+To create a weekly entry, for the current week, I run:
+```
+$ dayone2 --tags work -- new $'End of Week Work Summary\n\n' "$(DOT_ENV_CONFIG=~/.toggl-summary-cli.env npx @devwithimagination/toggl-summary-cli -d $(date -v -Mon +%Y-%m-%d) -w | tail -n +2)"
+```
+
 ## Testing
 
 This project uses [jest][jest] with [ts-jest][ts-jest] for testing. Running `npm test` will run the test suites and output coverage reports into the `coverage` directory. 
