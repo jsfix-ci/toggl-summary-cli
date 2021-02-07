@@ -42,11 +42,28 @@ WORKSPACE_ID=<id of the Toggle workspace>
 
 ```
 
+If the program is called with a `DOT_ENV_CONFIG` environment variable set, then an alternative location can be specified for this configuration file. 
+
+
 ## Example Usage 
 
 An example of running this for a single day:
 ```
 $ npx @devwithimagination/toggl-summary-cli -d 2020-09-18
+Report loaded, total booked time: 02:49:13
+Unbooked time since last entry: 00:22:04
+Unbooked time since last entry: 00:11:02
+Unbooked time since last entry: 00:15:05
+==== Totals for 2020-09-18 to 2020-09-18 ====
+Counted booked time: 02:49:11
+Counted unbooked time: 00:54:20
+Counted break time: 00:00:00
+Counted total time: 03:43:31
+```
+
+Running for a single day, using a configuration file in an alternative location:
+```
+$ DOT_ENV_CONFIG=~/.toggl-summary-cli.env npx @devwithimagination/toggl-summary-cli -d 2020-09-18
 Report loaded, total booked time: 02:49:13
 Unbooked time since last entry: 00:22:04
 Unbooked time since last entry: 00:11:02
