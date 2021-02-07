@@ -25,8 +25,18 @@ export interface Configuration {
  */
 export function processConfiguration(): Configuration {
 
-    /* Load environment file with configuration */
-    require('dotenv').config();
+    /* 
+     * Load environment file with configuration.
+     * If the DOT_ENV_CONFIG environment variable is set then
+     * use it as a path. 
+     */
+    let dotenvConfig;
+    if (process.env.DOT_ENV_CONFIG) {
+        dotenvConfig = {
+            path: process.env.DOT_ENV_CONFIG
+        }
+    }
+    require('dotenv').config(dotenvConfig)
 
     /* Configure command line options */
     const program = new Command();
@@ -49,19 +59,18 @@ export function processConfiguration(): Configuration {
         .option('-w, --week',
             'If specified, interpret the day as the start of a week.');
 
-
     program.parse(process.argv);
 
-    if (program.debug) {
+    if (program.opts().debug) {
         console.log(program.opts());
     }
 
-    const since = LocalDate.parse(program.day);
-    const until = (program.week ? since.plusDays(6) : since);
+    const since = LocalDate.parse(program.opts().day);
+    const until = (program.opts().week ? since.plusDays(6) : since);
 
     const apiConfig: AxiosRequestConfig = {
         auth: {
-            username: program.apiKey,
+            username: program.opts().apiKey,
             password: 'api_token'
         },
         headers: {
@@ -70,19 +79,19 @@ export function processConfiguration(): Configuration {
         },
         params: {
             page: 1,
-            user_agent: program.email,
-            workspace_id: program.workspaceId,
+            user_agent: program.opts().email,
+            workspace_id: program.opts().workspaceId,
             since: since.toString(),
             until: until.toString()
         }
       };
 
-    if (program.debug) {
+    if (program.opts().debug) {
         console.log(apiConfig);
     }
 
     return {
-        debug: program.debug,
+        debug: program.opts().debug,
         apiConfig: apiConfig
     };
 }
