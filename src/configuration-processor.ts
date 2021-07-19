@@ -14,7 +14,11 @@ export interface Configuration {
     /**
      * The API configuration for the Toggl API
      */
-    apiConfig: AxiosRequestConfig
+    apiConfig: AxiosRequestConfig,
+    /**
+     * Boolean for if per client/project summary information should be included or not. 
+     */
+    includeSummary: boolean
 }
 
 /**
@@ -57,7 +61,9 @@ export function processConfiguration(): Configuration {
             'If a date is not supplied then this will default to today.',
             LocalDate.now().toString())
         .option('-w, --week',
-            'If specified, interpret the day as the start of a week.');
+            'If specified, interpret the day as the start of a week.')
+        .option('--include-summary',
+            'If specified, include client/proect summary detail');
 
     program.parse(process.argv);
 
@@ -92,6 +98,7 @@ export function processConfiguration(): Configuration {
 
     return {
         debug: program.opts().debug,
-        apiConfig: apiConfig
+        apiConfig: apiConfig,
+        includeSummary: program.opts().includeSummary
     };
 }
