@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import { Duration, ZonedDateTime, LocalDate } from '@js-joda/core';
-import { SimplifiedDetailedReportItem } from "./structures";
+import { SimplifiedDetailedReportItem } from "../structures";
 
 /**
  * Interface holding the calculated times

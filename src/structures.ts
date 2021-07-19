@@ -109,3 +109,29 @@ export interface DetailedReportResponse extends SuccessReportResponse<DetailedRe
      */
     per_page: number;
 }
+
+/**
+ * The title of a data item which is returned by the summary report API call. 
+ */
+export interface SummaryReportTitle {
+    client?: string;
+    project?: string;
+    user?: string;
+}
+
+/**
+ * Object holding fields for a single data item in the summary report call. 
+ */
+export interface SummaryReportItem {
+    title: SummaryReportTitle;
+    time: number;
+
+    items?: SummaryReportItem[];
+}
+
+/**
+ * Response object for the call to the summary report API. 
+ */
+export interface SummaryReportResponse extends SuccessReportResponse<SummaryReportItem> {
+
+}
