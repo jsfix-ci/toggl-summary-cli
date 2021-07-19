@@ -63,7 +63,7 @@ export function processConfiguration(): Configuration {
         .option('-w, --week',
             'If specified, interpret the day as the start of a week.')
         .option('--include-summary',
-            'If specified, include client/proect summary detail');
+            'If specified, include client/project summary detail');
 
     program.parse(process.argv);
 
