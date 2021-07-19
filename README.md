@@ -137,12 +137,12 @@ I use [Day One](https://dayoneapp.com) as my journaling application of choice. T
 
 To create a daily entry, for the current day, I run:
 ```
-$ dayone2 --tags work -- new $'End of Day Work Summary\n\n' "$(DOT_ENV_CONFIG=~/.toggl-summary-cli.env npx @devwithimagination/toggl-summary-cli | tail -n +2)"
+$ dayone2 --tags work -- new $'End of Day Work Summary\n\n' "$(DOT_ENV_CONFIG=~/.toggl-summary-cli.env npx @devwithimagination/toggl-summary-cli )"
 ```
 
 To create a weekly entry, for the current week, I run:
 ```
-$ dayone2 --tags work -- new $'End of Week Work Summary\n\n' "$(DOT_ENV_CONFIG=~/.toggl-summary-cli.env npx @devwithimagination/toggl-summary-cli -d $(date -v -Mon +%Y-%m-%d) -w | tail -n +2)"
+$ dayone2 --tags work -- new $'End of Week Work Summary\n\n' "$(DOT_ENV_CONFIG=~/.toggl-summary-cli.env npx @devwithimagination/toggl-summary-cli -d $(date -v -Mon +%Y-%m-%d) -w )"
 ```
 
 ## Testing
