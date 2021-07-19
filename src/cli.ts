@@ -5,9 +5,9 @@ import chalk from 'chalk'
 
 import { Configuration, processConfiguration } from './configuration-processor';
 import { DetailedReportItem, DetailedReportResponse } from './structures';
-import { calculateTimeTotals, formatMillis } from './time-reporter'
+import { calculateTimeTotals, formatMillis } from './time/time-reporter'
 
-const apiUrl = 'https://toggl.com/reports/api/v2/details';
+const apiUrl = 'https://api.track.toggl.com/reports/api/v2/details';
 
 /* Define a function for loading our report data from the API. This handles pagination */
 const getDetailedReportData = async (page: number): Promise<DetailedReportItem[]> => {  
