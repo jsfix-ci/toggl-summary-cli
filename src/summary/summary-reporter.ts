@@ -82,7 +82,7 @@ export function getGroupingName(title: SummaryReportTitle): string {
     } else if (title.user) {
         return title.user;
     } else {
-        return 'Unknown';
+        return 'Unknown Client/Project';
     }
 
 }
@@ -101,6 +101,30 @@ export function calculatePercentage(partialValue: number, totalValue: number): n
 }
 
 /**
+ * Calculate the total duration that should be used based on the input data.
+ * 
+ * If a TimeSummary is supplied, the totalCount value from this will be used. Otherwise
+ * the total duration will be calculated from the summary report data. 
+ * 
+ * @param reportData the input summary report data items
+ * @param totalTime the time summary calculated from detailed entries
+ * @returns the total time value to use. 
+ */
+export function calculateTotalTime(reportData: SummaryReportItem[], totalTime: TimeSummary | undefined) : number {
+    
+    let totalDuration = 0;
+    if (totalTime) {
+        /* If a time summary has been passed through, use it for the total */
+        totalDuration = totalTime.timeCount;
+    } else {
+        /* A summary was not passed through, calculate based on the supplied items */
+        reportData.map(v => v.time).forEach(value => totalDuration += value);
+    }
+
+    return totalDuration;
+}
+
+/**
  * Calculate summary information for the report data, split into per-client and per-project.
  * 
  * This assumes the summary API has been invoked with the following parameters:
@@ -115,15 +139,10 @@ export function calculatePercentage(partialValue: number, totalValue: number): n
  */
 export function calculateSummaryTotals(reportData: SummaryReportItem[], totalTime: TimeSummary | undefined, debug: boolean): Summary[] {
 
-    let totalDuration = 0;
-    if (totalTime) {
-        /* If a time summary has been passed through, use it for the total */
-        totalDuration = totalTime.timeCount;
-    } else {
-        /* A summary was not passed through, calculate based on the supplied items */
-        reportData.map(v => v.time).forEach(value => totalDuration += value);
-    }
+    /* Get the total duration to use */
+    const totalDuration = calculateTotalTime(reportData, totalTime);
 
+    /* Process each data item */
     const retItems = reportData.map(value => {
 
         const groupingType = getGroupingType(value.title);
@@ -139,6 +158,7 @@ export function calculateSummaryTotals(reportData: SummaryReportItem[], totalTim
         }
 
         if (value.items) {
+            /* If there are subgroup items, process recursively */
             summary.subgroupSummary = calculateSummaryTotals(value.items, undefined, debug);
         } else {
             summary.subgroupSummary = undefined;
@@ -149,7 +169,7 @@ export function calculateSummaryTotals(reportData: SummaryReportItem[], totalTim
     });
 
     if (totalTime) {
-        /* If there are time totals supplied, include an item for unbooked */
+        /* If there are time totals supplied from detailed reports, include an item for unbooked */
         retItems.push({
             bookedTime: totalTime.unbookedTime,
             groupingType: GroupingType.UNKNOWN,
@@ -157,6 +177,9 @@ export function calculateSummaryTotals(reportData: SummaryReportItem[], totalTim
             name: 'Unbooked Time'
         });
     }
+
+    /* Sort by time */
+    retItems.sort((a, b) => b.bookedTime - a.bookedTime);
 
     return retItems;
 }
