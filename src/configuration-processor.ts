@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { Command } from 'commander';
+import { Option, Command } from 'commander';
 import { LocalDate } from '@js-joda/core';
 
 /**
@@ -55,11 +55,8 @@ export function processConfiguration(): Configuration {
         .requiredOption('--workspace-id <workspace id>', 
             'id of the Toggle workspace', 
             process.env.WORKSPACE_ID)
-
-        .option('-d, --day <date>',
-            'day to report on (in yyyy-MM-dd format). ' +
-            'If a date is not supplied then this will default to today.',
-            LocalDate.now().toString())
+      .addOption(new Option('-d, --day <date>', 'day to report on (in yyyy-MM-dd format). ' +
+    'If a date is not supplied then this will default to today.').preset(LocalDate.now().toString()))
         .option('-w, --week',
             'If specified, interpret the day as the start of a week.')
         .option('--include-summary',
