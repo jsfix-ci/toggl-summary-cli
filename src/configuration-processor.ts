@@ -56,10 +56,8 @@ export function processConfiguration(): Configuration {
             'id of the Toggle workspace', 
             process.env.WORKSPACE_ID)
 
-        .option('-d, --day <date>',
-            'day to report on (in yyyy-MM-dd format). ' +
-            'If a date is not supplied then this will default to today.',
-            LocalDate.now().toString())
+        .option('-d, --day <date>','day to report on (in yyyy-MM-dd format). ' +
+    'If a date is not supplied then this will default to today.').preset(LocalDate.now().toString())
         .option('-w, --week',
             'If specified, interpret the day as the start of a week.')
         .option('--include-summary',
